@@ -2,7 +2,18 @@
 
 Calendar-based work schedule and settlement demo for freelance home-shopping food styling work.
 
-## Current Demo
+## Expo App
+
+This project is now scaffolded as an Expo React Native app.
+
+```sh
+npm install
+npm start
+```
+
+For Galaxy testing, install Expo Go on the phone, keep the Mac and phone on the same Wi-Fi, then scan the QR code from the Expo dev server.
+
+## Static Prototype
 
 The first static HTML prototype is preserved under `prototype/`. It can be opened directly in a browser or served locally.
 
