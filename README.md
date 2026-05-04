@@ -4,9 +4,10 @@ Calendar-based work schedule and settlement demo for freelance home-shopping foo
 
 ## Current Demo
 
-This is a static HTML prototype. It can be opened directly in a browser or served locally.
+The first static HTML prototype is preserved under `prototype/`. It can be opened directly in a browser or served locally.
 
 ```sh
+cd prototype
 python3 -m http.server 8787
 ```
 
