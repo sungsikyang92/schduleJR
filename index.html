@@ -460,6 +460,60 @@
         margin-top: 12px;
       }
 
+      .settings-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 14px;
+      }
+
+      .settings-card {
+        padding: 16px;
+        border-radius: 8px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        display: grid;
+        gap: 12px;
+      }
+
+      .settings-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .settings-row strong {
+        display: block;
+        margin-bottom: 3px;
+      }
+
+      .switch {
+        width: 54px;
+        height: 32px;
+        border-radius: 999px;
+        background: #cfd6df;
+        padding: 3px;
+        flex: 0 0 auto;
+      }
+
+      .switch span {
+        display: block;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(22, 29, 38, 0.18);
+        transition: transform 0.18s ease;
+      }
+
+      .switch.active {
+        background: var(--blue);
+      }
+
+      .switch.active span {
+        transform: translateX(22px);
+      }
+
       .bar {
         height: 8px;
         border-radius: 999px;
@@ -485,7 +539,7 @@
         background: var(--surface);
         border-top: 1px solid var(--line);
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         padding: 8px 10px 10px;
         gap: 8px;
       }
@@ -706,6 +760,69 @@
             <div class="stats-list" id="statsList"></div>
             <button class="secondary-button share-button" id="shareSchedule">이번 달 일정 공유</button>
           </section>
+
+          <section class="view" id="settingsView">
+            <div class="panel-title">
+              <div>
+                <h2>설정</h2>
+                <p class="muted">계정, 캘린더 동기화, 프라이버시를 관리합니다.</p>
+              </div>
+            </div>
+
+            <div class="settings-list">
+              <section class="settings-card">
+                <div class="settings-row">
+                  <div>
+                    <strong>Google 계정</strong>
+                    <p class="muted" id="googleAccountLabel">연결 안 됨</p>
+                  </div>
+                  <button class="secondary-button" id="connectGoogle" type="button">연결</button>
+                </div>
+              </section>
+
+              <section class="settings-card">
+                <div class="settings-row">
+                  <div>
+                    <strong>Google 캘린더 동기화</strong>
+                    <p class="muted">일정만 Google 캘린더에 저장합니다.</p>
+                  </div>
+                  <button class="switch" id="syncCalendarToggle" type="button" aria-label="Google 캘린더 동기화">
+                    <span></span>
+                  </button>
+                </div>
+
+                <label>
+                  저장할 캘린더
+                  <select id="calendarSelect">
+                    <option value="mom-work">엄마 근무</option>
+                    <option value="primary">기본 캘린더</option>
+                    <option value="family">가족 공유 캘린더</option>
+                  </select>
+                </label>
+              </section>
+
+              <section class="settings-card">
+                <div class="settings-row">
+                  <div>
+                    <strong>금액 기본 숨김</strong>
+                    <p class="muted">정산 탭을 열 때 항상 금액을 가립니다.</p>
+                  </div>
+                  <button class="switch active" id="hideMoneyToggle" type="button" aria-label="금액 기본 숨김">
+                    <span></span>
+                  </button>
+                </div>
+              </section>
+
+              <section class="settings-card">
+                <div class="settings-row">
+                  <div>
+                    <strong>캘린더 저장 내용</strong>
+                    <p class="muted">업체, 장소, 시간만 저장하고 금액은 저장하지 않습니다.</p>
+                  </div>
+                </div>
+              </section>
+            </div>
+          </section>
         </section>
 
         <nav class="bottom-nav" aria-label="하단 메뉴">
@@ -726,6 +843,13 @@
               <path d="M4 19V5M9 19v-7M14 19V8M19 19v-4" />
             </svg>
             정산
+          </button>
+          <button class="nav-button" data-nav="settings">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6V20a2 2 0 0 1-4 0v-.09a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1H4a2 2 0 0 1 0-4h.09a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6V4a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.14.37.34.7.6 1H20a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-.51 1Z" />
+            </svg>
+            설정
           </button>
         </nav>
       </section>
@@ -762,6 +886,12 @@
         paymentStatus: "unpaid",
         editingEventId: null,
         showMoney: false,
+        settings: {
+          googleConnected: false,
+          syncToGoogleCalendar: false,
+          hideMoneyByDefault: true,
+          selectedGoogleCalendarId: "mom-work"
+        },
         modalType: "location",
         locations: [
           { id: "loc-1", name: "상암 스튜디오" },
@@ -994,6 +1124,11 @@
           $("#primarySummaryValue").textContent = `${monthEvents.length}건`;
           $("#secondarySummaryLabel").textContent = "총 근무시간";
           $("#secondarySummaryValue").textContent = formatHours(totalMinutes);
+        } else if (state.activeView === "settings") {
+          $("#primarySummaryLabel").textContent = "Google 계정";
+          $("#primarySummaryValue").textContent = state.settings.googleConnected ? "연결됨" : "미연결";
+          $("#secondarySummaryLabel").textContent = "캘린더 동기화";
+          $("#secondarySummaryValue").textContent = state.settings.syncToGoogleCalendar ? "켜짐" : "꺼짐";
         } else {
           $("#primarySummaryLabel").textContent = "오늘 일정";
           $("#primarySummaryValue").textContent = `${todayEvents.length}건`;
@@ -1045,18 +1180,32 @@
           .join("");
       }
 
+      function renderSettings() {
+        $("#googleAccountLabel").textContent = state.settings.googleConnected
+          ? "sungsikyang92@gmail.com"
+          : "연결 안 됨";
+        $("#connectGoogle").textContent = state.settings.googleConnected ? "해제" : "연결";
+        $("#syncCalendarToggle").classList.toggle("active", state.settings.syncToGoogleCalendar);
+        $("#hideMoneyToggle").classList.toggle("active", state.settings.hideMoneyByDefault);
+        $("#calendarSelect").value = state.settings.selectedGoogleCalendarId;
+      }
+
       function renderAll() {
         renderOptions();
         renderCalendar();
         renderDay();
         renderStats();
+        renderSettings();
       }
 
       function setView(view) {
-        if (state.activeView === "stats" && view !== "stats") {
+        if (state.activeView === "stats" && view !== "stats" && state.settings.hideMoneyByDefault) {
           state.showMoney = false;
         }
         state.activeView = view;
+        if (view === "stats" && state.settings.hideMoneyByDefault) {
+          state.showMoney = false;
+        }
         $$(".view").forEach((el) => el.classList.remove("active"));
         $(`#${view}View`).classList.add("active");
         $(".content").scrollTop = 0;
@@ -1228,6 +1377,35 @@
       $("#toggleMoney").addEventListener("click", () => {
         state.showMoney = !state.showMoney;
         renderStats();
+      });
+
+      $("#connectGoogle").addEventListener("click", () => {
+        state.settings.googleConnected = !state.settings.googleConnected;
+        if (!state.settings.googleConnected) {
+          state.settings.syncToGoogleCalendar = false;
+        }
+        renderAll();
+      });
+
+      $("#syncCalendarToggle").addEventListener("click", () => {
+        if (!state.settings.googleConnected) {
+          state.settings.googleConnected = true;
+        }
+        state.settings.syncToGoogleCalendar = !state.settings.syncToGoogleCalendar;
+        renderAll();
+      });
+
+      $("#hideMoneyToggle").addEventListener("click", () => {
+        state.settings.hideMoneyByDefault = !state.settings.hideMoneyByDefault;
+        if (state.settings.hideMoneyByDefault) {
+          state.showMoney = false;
+        }
+        renderAll();
+      });
+
+      $("#calendarSelect").addEventListener("change", (event) => {
+        state.settings.selectedGoogleCalendarId = event.target.value;
+        renderSettings();
       });
 
       $("#shareTodayEnd").addEventListener("click", async () => {

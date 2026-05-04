@@ -29,6 +29,7 @@ http://127.0.0.1:8787
 - Paid/unpaid breakdown by client with segmented bars
 - Share today's end time without exposing money
 - Share monthly schedules without exposing money
+- Settings tab for Google account, Google Calendar sync, calendar selection, and money privacy defaults
 
 ## Planned Architecture
 
@@ -37,4 +38,3 @@ http://127.0.0.1:8787
 - Schedule sync: Google Calendar API
 - Calendar events should store only schedule-safe fields such as client, location, date, and time
 - Money and payment status should remain in the app database, not in Google Calendar
-
