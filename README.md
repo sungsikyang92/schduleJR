@@ -2,8 +2,6 @@
 
 Calendar-based work schedule and settlement demo for freelance home-shopping food styling work.
 
-This repository keeps shared agent instructions in `CLAUDE.md` for Claude and `~/.codex/AGENTS.md` for Codex.
-
 ## Expo App
 
 This project is now scaffolded as an Expo React Native app.
