@@ -1,6 +1,8 @@
-# schduleJR
+# 근무캘린더앱
 
 Calendar-based work schedule and settlement demo for freelance home-shopping food styling work.
+
+This repository keeps shared agent instructions in `CLAUDE.md` for Claude and `~/.codex/AGENTS.md` for Codex.
 
 ## Expo App
 
