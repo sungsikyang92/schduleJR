@@ -18,8 +18,8 @@ type Props = {
   editingEvent?: WorkEvent;
   locations: Location[];
   selectedDate: string;
-  onAddClient: (name: string) => string;
-  onAddLocation: (name: string) => string;
+  onAddClient: (name: string) => Promise<string>;
+  onAddLocation: (name: string) => Promise<string>;
   onCancel: () => void;
   onSave: (draft: Omit<WorkEvent, "id" | "createdAt" | "updatedAt">, eventId?: string) => void;
 };
@@ -53,18 +53,18 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
     !draft.clientId ? "업체" : "",
   ].filter(Boolean);
 
-  const addLocation = () => {
+  const addLocation = async () => {
     const name = newLocation.trim();
     if (!name) return;
-    const id = onAddLocation(name);
+    const id = await onAddLocation(name);
     update("locationId", id);
     setNewLocation("");
   };
 
-  const addClient = () => {
+  const addClient = async () => {
     const name = newClient.trim();
     if (!name) return;
-    const id = onAddClient(name);
+    const id = await onAddClient(name);
     update("clientId", id);
     setNewClient("");
   };
