@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Client, Location, PaymentStatus, WorkEvent } from "../types";
 
@@ -42,6 +42,10 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
   const [newClient, setNewClient] = useState("");
   const [openTimePicker, setOpenTimePicker] = useState<"startTime" | null>(null);
   const [confirmModal, setConfirmModal] = useState<{ message: string; onConfirm: () => void } | null>(null);
+  const [alertMessage, setAlertMessage] = useState<string | null>(null);
+  const [alertCountdown, setAlertCountdown] = useState(3);
+  const alertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const alertIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     setDraft((current) => {
@@ -56,6 +60,19 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
   }, [clients, editingEvent, locations, selectedDate]);
 
   const update = (key: keyof Draft, value: string) => setDraft((current) => ({ ...current, [key]: value }));
+  const showAlert = (message: string) => {
+    if (alertTimerRef.current) clearTimeout(alertTimerRef.current);
+    if (alertIntervalRef.current) clearInterval(alertIntervalRef.current);
+    setAlertMessage(message);
+    setAlertCountdown(3);
+    alertIntervalRef.current = setInterval(() => {
+      setAlertCountdown((c) => {
+        if (c <= 1) { clearInterval(alertIntervalRef.current!); return 0; }
+        return c - 1;
+      });
+    }, 1000);
+    alertTimerRef.current = setTimeout(() => setAlertMessage(null), 3000);
+  };
   const confirmDelete = (message: string, onConfirm: () => void) => setConfirmModal({ message, onConfirm });
   const missingFields = [
     !draft.date ? "날짜" : "",
@@ -66,6 +83,7 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
   const addLocation = async () => {
     const name = newLocation.trim();
     if (!name) return;
+    if (locations.some((l) => l.name === name)) { showAlert("같은 이름의 장소가 이미 있습니다."); return; }
     const id = await onAddLocation(name);
     update("locationId", id);
     setNewLocation("");
@@ -74,6 +92,7 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
   const addClient = async () => {
     const name = newClient.trim();
     if (!name) return;
+    if (clients.some((c) => c.name === name)) { showAlert("같은 이름의 업체가 이미 있습니다."); return; }
     const id = await onAddClient(name);
     update("clientId", id);
     setNewClient("");
@@ -83,14 +102,8 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
     const startTime = draft.startTime.trim() || defaultDraftValues.startTime;
     const amount = Number(draft.amount || defaultDraftValues.amount);
 
-    if (missingFields.length) {
-      Alert.alert("저장할 수 없음", `${missingFields.join(", ")}을 입력해주세요.`);
-      return;
-    }
-    if (amount <= 0) {
-      Alert.alert("저장할 수 없음", "금액은 0보다 커야 합니다.");
-      return;
-    }
+    if (missingFields.length) { showAlert(`${missingFields.join(", ")}을 입력해주세요.`); return; }
+    if (amount <= 0) { showAlert("금액은 0보다 커야 합니다."); return; }
     onSave(
       {
         amount,
@@ -188,6 +201,20 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
           </TouchableOpacity>
         </View>
       </View>
+
+      <Modal visible={!!alertMessage} transparent animationType="fade" onRequestClose={() => setAlertMessage(null)}>
+        <View style={styles.confirmBackdrop}>
+          <View style={styles.confirmBox}>
+            <Text style={styles.confirmMessage}>{alertMessage}</Text>
+            <Text style={styles.alertHint}>{alertCountdown}초 후에 자동으로 닫힙니다.</Text>
+            <View style={styles.confirmButtons}>
+              <TouchableOpacity style={styles.primaryButton} onPress={() => { if (alertTimerRef.current) clearTimeout(alertTimerRef.current); if (alertIntervalRef.current) clearInterval(alertIntervalRef.current); setAlertMessage(null); }}>
+                <Text style={styles.primaryButtonText}>확인</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       <Modal visible={!!confirmModal} transparent animationType="fade" onRequestClose={() => setConfirmModal(null)}>
         <View style={styles.confirmBackdrop}>
@@ -287,6 +314,7 @@ const styles = StyleSheet.create({
   confirmBackdrop: { alignItems: "center", backgroundColor: "rgba(0,0,0,0.4)", flex: 1, justifyContent: "center" },
   confirmBox: { backgroundColor: "#fff", borderRadius: 14, gap: 20, padding: 24, width: 280 },
   confirmMessage: { color: "#171a1f", fontSize: 15, fontWeight: "800", textAlign: "center" },
+  alertHint: { color: "#a4abb4", fontSize: 12, marginTop: -10, textAlign: "center" },
   confirmButtons: { flexDirection: "row", gap: 10, justifyContent: "flex-end" },
   deleteButton: { backgroundColor: "#d15b4f", borderRadius: 8, paddingHorizontal: 18, paddingVertical: 12 },
   deleteButtonText: { color: "#fff", fontWeight: "900" },
