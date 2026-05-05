@@ -17,6 +17,9 @@ type Props = {
 
 const weekdays = ["일", "월", "화", "수", "목", "금", "토"];
 
+const rainbowColors = ["#e53935", "#f4831f", "#fbc02d", "#43a047", "#1e88e5", "#3949ab", "#8e24aa"];
+const getDotColor = (count: number) => rainbowColors[Math.min(count, rainbowColors.length) - 1];
+
 export function CalendarScreen({
   clients,
   events,
@@ -81,9 +84,10 @@ export function CalendarScreen({
 
       <View style={styles.calendarGrid}>
         {days.map((day) => {
-          const hasEvent = events.some((event) => event.date === day.key);
+          const eventCount = events.filter((event) => event.date === day.key).length;
           const isSelected = day.key === selectedDate;
           const isToday = day.key === dateKey(new Date());
+          const dotColor = isSelected ? "#fff" : isToday && eventCount === 0 ? "#315fbd" : eventCount > 0 ? getDotColor(eventCount) : "transparent";
           return (
             <View key={day.key} style={styles.daySlot}>
               <TouchableOpacity
@@ -91,7 +95,7 @@ export function CalendarScreen({
                 onPress={() => onSelectDate(day.key)}
               >
                 <Text style={[styles.dayText, !day.isCurrentMonth && styles.outsideDayText, isToday && styles.todayDayText, isSelected && styles.selectedDayText]}>{day.day}</Text>
-                <View style={[styles.eventDot, !hasEvent && styles.emptyDot, isToday && styles.todayDot, isSelected && hasEvent && styles.selectedEventDot]} />
+                <View style={[styles.eventDot, { backgroundColor: dotColor }]} />
               </TouchableOpacity>
             </View>
           );
@@ -168,7 +172,6 @@ const styles = StyleSheet.create({
   },
   daySlot: { padding: 3, width: "14.285714%" },
   dayText: { color: "#171a1f", fontSize: 16 },
-  emptyDot: { backgroundColor: "transparent" },
   emptyText: { color: "#6f7782", fontSize: 14, marginTop: 14 },
   eventCard: { borderColor: "#e3e7ec", borderRadius: 8, borderWidth: 1, gap: 12, marginTop: 12, padding: 15 },
   eventClient: { color: "#171a1f", fontSize: 16, fontWeight: "900" },
@@ -189,7 +192,6 @@ const styles = StyleSheet.create({
   secondaryButtonText: { color: "#171a1f", fontWeight: "900" },
   selectedDayCell: { backgroundColor: "#315fbd", borderColor: "#315fbd" },
   selectedDayText: { color: "#fff", fontWeight: "900" },
-  selectedEventDot: { backgroundColor: "#f4b4ad" },
   squareButton: { alignItems: "center", backgroundColor: "#fff", borderColor: "#e3e7ec", borderRadius: 8, borderWidth: 1, height: 44, justifyContent: "center", width: 44 },
   arrowText: { color: "#171a1f", fontSize: 30, lineHeight: 32 },
   subtle: { color: "#6f7782", fontSize: 13, marginTop: 2 },
