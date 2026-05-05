@@ -1,6 +1,6 @@
 import { DimensionValue, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Client, WorkEvent } from "../types";
-import { formatHours, minutesBetween, monthTitle } from "../utils/date";
+import { monthTitle } from "../utils/date";
 import { privateMoney } from "../utils/money";
 
 type Props = {
@@ -19,7 +19,6 @@ export function SettlementScreen({ clients, events, showMoney, visibleDate, onTo
   const monthTotal = monthEvents.reduce((sum, event) => sum + event.amount, 0);
   const paidTotal = monthEvents.filter((event) => event.paymentStatus === "paid").reduce((sum, event) => sum + event.amount, 0);
   const unpaidTotal = monthTotal - paidTotal;
-  const totalMinutes = monthEvents.reduce((sum, event) => sum + Math.max(0, minutesBetween(event.startTime, event.endTime)), 0);
 
   const byClient = clients
     .map((client) => {
@@ -46,7 +45,6 @@ export function SettlementScreen({ clients, events, showMoney, visibleDate, onTo
 
         <View style={styles.summaryGrid}>
           <Summary label="이번 달" value={`${monthEvents.length}건`} />
-          <Summary label="근무시간" value={formatHours(totalMinutes)} />
           <Summary label="총액" value={privateMoney(monthTotal, showMoney)} />
           <Summary label="미지급" value={privateMoney(unpaidTotal, showMoney)} />
         </View>

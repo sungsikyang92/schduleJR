@@ -6,7 +6,6 @@ type Draft = {
   amount: string;
   clientId: string;
   date: string;
-  endTime: string;
   locationId: string;
   memo: string;
   paymentStatus: PaymentStatus;
@@ -26,7 +25,6 @@ type Props = {
 
 const defaultDraftValues = {
   amount: "300000",
-  endTime: "15:00",
   startTime: "09:00",
 };
 
@@ -40,10 +38,18 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
   const [draft, setDraft] = useState<Draft>(() => buildDraft(editingEvent, selectedDate, locations[0]?.id, clients[0]?.id));
   const [newLocation, setNewLocation] = useState("");
   const [newClient, setNewClient] = useState("");
-  const [openTimePicker, setOpenTimePicker] = useState<"startTime" | "endTime" | null>(null);
+  const [openTimePicker, setOpenTimePicker] = useState<"startTime" | null>(null);
 
   useEffect(() => {
-    setDraft(buildDraft(editingEvent, selectedDate, locations[0]?.id, clients[0]?.id));
+    setDraft((current) => {
+      if (editingEvent) return buildDraft(editingEvent, selectedDate, locations[0]?.id, clients[0]?.id);
+      return {
+        ...current,
+        date: selectedDate,
+        clientId: current.clientId || clients[0]?.id || "",
+        locationId: current.locationId || locations[0]?.id || "",
+      };
+    });
   }, [clients, editingEvent, locations, selectedDate]);
 
   const update = (key: keyof Draft, value: string) => setDraft((current) => ({ ...current, [key]: value }));
@@ -71,7 +77,6 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
 
   const save = () => {
     const startTime = draft.startTime.trim() || defaultDraftValues.startTime;
-    const endTime = draft.endTime.trim() || defaultDraftValues.endTime;
     const amount = Number(draft.amount || defaultDraftValues.amount);
 
     if (missingFields.length) {
@@ -87,7 +92,6 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
         amount,
         clientId: draft.clientId,
         date: draft.date,
-        endTime,
         locationId: draft.locationId,
         memo: draft.memo.trim(),
         paymentStatus: draft.paymentStatus,
@@ -106,30 +110,15 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
         <Label text="날짜" />
         <TextInput style={styles.input} value={draft.date} onChangeText={(value) => update("date", value)} placeholder="2026-04-30" />
 
-        <View style={styles.row}>
-          <View style={styles.flex}>
-            <Label text="시작" />
-            <TimeSelect
-              isOpen={openTimePicker === "startTime"}
-              value={draft.startTime}
-              fallbackValue={defaultDraftValues.startTime}
-              onChange={(value) => update("startTime", value)}
-              onToggle={() => setOpenTimePicker((current) => (current === "startTime" ? null : "startTime"))}
-              onClose={() => setOpenTimePicker(null)}
-            />
-          </View>
-          <View style={styles.flex}>
-            <Label text="종료" />
-            <TimeSelect
-              isOpen={openTimePicker === "endTime"}
-              value={draft.endTime}
-              fallbackValue={defaultDraftValues.endTime}
-              onChange={(value) => update("endTime", value)}
-              onToggle={() => setOpenTimePicker((current) => (current === "endTime" ? null : "endTime"))}
-              onClose={() => setOpenTimePicker(null)}
-            />
-          </View>
-        </View>
+        <Label text="시작" />
+        <TimeSelect
+          isOpen={openTimePicker === "startTime"}
+          value={draft.startTime}
+          fallbackValue={defaultDraftValues.startTime}
+          onChange={(value) => update("startTime", value)}
+          onToggle={() => setOpenTimePicker((current) => (current === "startTime" ? null : "startTime"))}
+          onClose={() => setOpenTimePicker(null)}
+        />
 
         <Label text="장소" />
         <View style={styles.optionGrid}>
@@ -194,7 +183,6 @@ function buildDraft(editingEvent: WorkEvent | undefined, selectedDate: string, f
     amount: editingEvent ? String(editingEvent.amount) : "",
     clientId: editingEvent?.clientId ?? firstClientId,
     date: editingEvent?.date ?? selectedDate,
-    endTime: editingEvent?.endTime ?? "",
     locationId: editingEvent?.locationId ?? firstLocationId,
     memo: editingEvent?.memo ?? "",
     paymentStatus: editingEvent?.paymentStatus ?? "unpaid",

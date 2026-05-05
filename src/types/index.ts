@@ -4,7 +4,6 @@ export type WorkEvent = {
   id: string;
   date: string;
   startTime: string;
-  endTime: string;
   locationId: string;
   clientId: string;
   amount: number;

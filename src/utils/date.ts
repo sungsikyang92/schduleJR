@@ -53,14 +53,3 @@ export function buildCalendarDays(visibleDate: Date) {
   });
 }
 
-export function minutesBetween(startTime: string, endTime: string) {
-  const [startHour, startMinute] = startTime.split(":").map(Number);
-  const [endHour, endMinute] = endTime.split(":").map(Number);
-  return endHour * 60 + endMinute - (startHour * 60 + startMinute);
-}
-
-export function formatHours(totalMinutes: number) {
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return minutes ? `${hours}시간 ${minutes}분` : `${hours}시간`;
-}

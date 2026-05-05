@@ -40,12 +40,12 @@ export function CalendarScreen({
   const getLocation = (id: string) => locations.find((location) => location.id === id)?.name ?? "";
 
   const shareTodayEnd = async () => {
-    const lastEvent = [...todayEvents].sort((a, b) => b.endTime.localeCompare(a.endTime))[0];
+    const lastEvent = [...todayEvents].sort((a, b) => b.startTime.localeCompare(a.startTime))[0];
     if (!lastEvent) {
       Alert.alert("공유할 일정 없음", "오늘 등록된 일정이 없습니다.");
       return;
     }
-    await Share.share({ message: `오늘 ${lastEvent.endTime}에 끝날 예정입니다. (${getLocation(lastEvent.locationId)})` });
+    await Share.share({ message: `오늘 ${lastEvent.startTime} 출근입니다. (${getLocation(lastEvent.locationId)})` });
   };
 
   return (
@@ -122,9 +122,7 @@ export function CalendarScreen({
                   <Text style={styles.eventClient}>{getClient(event.clientId)}</Text>
                   <Text style={styles.eventLocation}>{getLocation(event.locationId)}</Text>
                 </View>
-                <Text style={styles.timeBadge}>
-                  {event.startTime}-{event.endTime}
-                </Text>
+                <Text style={styles.timeBadge}>{event.startTime}</Text>
               </View>
               <View style={styles.badgeRow}>
                 <Text style={[styles.badge, event.paymentStatus === "paid" ? styles.paidBadge : styles.unpaidBadge]}>
