@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { Client, Location, PaymentStatus, WorkEvent } from "../types";
 
 type Draft = {
@@ -19,6 +19,8 @@ type Props = {
   selectedDate: string;
   onAddClient: (name: string) => Promise<string>;
   onAddLocation: (name: string) => Promise<string>;
+  onDeleteClient: (id: string) => void;
+  onDeleteLocation: (id: string) => void;
   onCancel: () => void;
   onSave: (draft: Omit<WorkEvent, "id" | "createdAt" | "updatedAt">, eventId?: string) => void;
 };
@@ -34,11 +36,12 @@ const timeOptions = Array.from({ length: 25 }, (_, index) => {
   return `${String(hour).padStart(2, "0")}:${minute}`;
 });
 
-export function EventFormScreen({ clients, editingEvent, locations, selectedDate, onAddClient, onAddLocation, onCancel, onSave }: Props) {
+export function EventFormScreen({ clients, editingEvent, locations, selectedDate, onAddClient, onAddLocation, onDeleteClient, onDeleteLocation, onCancel, onSave }: Props) {
   const [draft, setDraft] = useState<Draft>(() => buildDraft(editingEvent, selectedDate, locations[0]?.id, clients[0]?.id));
   const [newLocation, setNewLocation] = useState("");
   const [newClient, setNewClient] = useState("");
   const [openTimePicker, setOpenTimePicker] = useState<"startTime" | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{ message: string; onConfirm: () => void } | null>(null);
 
   useEffect(() => {
     setDraft((current) => {
@@ -53,6 +56,7 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
   }, [clients, editingEvent, locations, selectedDate]);
 
   const update = (key: keyof Draft, value: string) => setDraft((current) => ({ ...current, [key]: value }));
+  const confirmDelete = (message: string, onConfirm: () => void) => setConfirmModal({ message, onConfirm });
   const missingFields = [
     !draft.date ? "날짜" : "",
     !draft.locationId ? "장소" : "",
@@ -123,9 +127,14 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
         <Label text="장소" />
         <View style={styles.optionGrid}>
           {locations.map((location) => (
-            <TouchableOpacity key={location.id} style={[styles.optionButton, draft.locationId === location.id && styles.selectedOption]} onPress={() => update("locationId", location.id)}>
-              <Text style={[styles.optionText, draft.locationId === location.id && styles.selectedOptionText]}>{location.name}</Text>
-            </TouchableOpacity>
+            <View key={location.id} style={[styles.optionButton, draft.locationId === location.id && styles.selectedOption, styles.optionRow]}>
+              <TouchableOpacity onPress={() => update("locationId", location.id)} style={styles.optionLabel}>
+                <Text style={[styles.optionText, draft.locationId === location.id && styles.selectedOptionText]}>{location.name}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => confirmDelete(`'${location.name}' 장소를 삭제할까요?`, () => { if (draft.locationId === location.id) update("locationId", ""); onDeleteLocation(location.id); })}>
+                <Text style={[styles.optionDeleteText, draft.locationId === location.id && styles.selectedOptionText]}>×</Text>
+              </TouchableOpacity>
+            </View>
           ))}
         </View>
         <View style={styles.inlineAdd}>
@@ -138,9 +147,14 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
         <Label text="업체" />
         <View style={styles.optionGrid}>
           {clients.map((client) => (
-            <TouchableOpacity key={client.id} style={[styles.optionButton, draft.clientId === client.id && styles.selectedOption]} onPress={() => update("clientId", client.id)}>
-              <Text style={[styles.optionText, draft.clientId === client.id && styles.selectedOptionText]}>{client.name}</Text>
-            </TouchableOpacity>
+            <View key={client.id} style={[styles.optionButton, draft.clientId === client.id && styles.selectedOption, styles.optionRow]}>
+              <TouchableOpacity onPress={() => update("clientId", client.id)} style={styles.optionLabel}>
+                <Text style={[styles.optionText, draft.clientId === client.id && styles.selectedOptionText]}>{client.name}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => confirmDelete(`'${client.name}' 업체를 삭제할까요?`, () => { if (draft.clientId === client.id) update("clientId", ""); onDeleteClient(client.id); })}>
+                <Text style={[styles.optionDeleteText, draft.clientId === client.id && styles.selectedOptionText]}>×</Text>
+              </TouchableOpacity>
+            </View>
           ))}
         </View>
         <View style={styles.inlineAdd}>
@@ -174,6 +188,22 @@ export function EventFormScreen({ clients, editingEvent, locations, selectedDate
           </TouchableOpacity>
         </View>
       </View>
+
+      <Modal visible={!!confirmModal} transparent animationType="fade" onRequestClose={() => setConfirmModal(null)}>
+        <View style={styles.confirmBackdrop}>
+          <View style={styles.confirmBox}>
+            <Text style={styles.confirmMessage}>{confirmModal?.message}</Text>
+            <View style={styles.confirmButtons}>
+              <TouchableOpacity style={styles.secondaryButton} onPress={() => setConfirmModal(null)}>
+                <Text style={styles.secondaryButtonText}>취소</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.deleteButton} onPress={() => { confirmModal?.onConfirm(); setConfirmModal(null); }}>
+                <Text style={styles.deleteButtonText}>삭제</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -249,8 +279,17 @@ const styles = StyleSheet.create({
   label: { color: "#303741", fontSize: 13, fontWeight: "900", marginBottom: 7, marginTop: 16 },
   memo: { minHeight: 84, textAlignVertical: "top" },
   optionButton: { backgroundColor: "#fff", borderColor: "#dbe1e7", borderRadius: 8, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10 },
+  optionRow: { alignItems: "center", flexDirection: "row", gap: 6 },
+  optionLabel: { flex: 1 },
+  optionDeleteText: { color: "#a4abb4", fontSize: 18, fontWeight: "900", lineHeight: 20 },
   optionGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   optionText: { color: "#303741", fontWeight: "800" },
+  confirmBackdrop: { alignItems: "center", backgroundColor: "rgba(0,0,0,0.4)", flex: 1, justifyContent: "center" },
+  confirmBox: { backgroundColor: "#fff", borderRadius: 14, gap: 20, padding: 24, width: 280 },
+  confirmMessage: { color: "#171a1f", fontSize: 15, fontWeight: "800", textAlign: "center" },
+  confirmButtons: { flexDirection: "row", gap: 10, justifyContent: "flex-end" },
+  deleteButton: { backgroundColor: "#d15b4f", borderRadius: 8, paddingHorizontal: 18, paddingVertical: 12 },
+  deleteButtonText: { color: "#fff", fontWeight: "900" },
   panel: { backgroundColor: "#fff", borderColor: "#e3e7ec", borderRadius: 8, borderWidth: 1, padding: 16 },
   primaryButton: { backgroundColor: "#315fbd", borderRadius: 8, paddingHorizontal: 18, paddingVertical: 13 },
   primaryButtonText: { color: "#fff", fontWeight: "900" },

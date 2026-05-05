@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { addClient, addLocation, saveEvent, saveSettings, subscribeClients, subscribeEvents, subscribeLocations, subscribeSettings, toggleEventPayment } from "./src/services/db";
+import { addClient, addLocation, deleteClient, deleteLocation, saveEvent, saveSettings, subscribeClients, subscribeEvents, subscribeLocations, subscribeSettings, toggleEventPayment } from "./src/services/db";
 import { CalendarScreen } from "./src/screens/CalendarScreen";
 import { EventFormScreen } from "./src/screens/EventFormScreen";
 import { SettingsScreen } from "./src/screens/SettingsScreen";
@@ -153,6 +153,8 @@ export default function App() {
             selectedDate={selectedDate}
             onAddClient={addClient}
             onAddLocation={addLocation}
+            onDeleteClient={deleteClient}
+            onDeleteLocation={deleteLocation}
             onCancel={() => {
               setEditingEventId(undefined);
               setActiveTab("calendar");
