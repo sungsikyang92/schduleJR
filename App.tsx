@@ -72,6 +72,9 @@ export default function App() {
     if (tab === "add" && activeTab !== "add") {
       setEditingEventId(undefined);
     }
+    if (tab === "calendar" && activeTab !== "calendar") {
+      selectDate(todayKey());
+    }
     setActiveTabState(tab);
   };
 
