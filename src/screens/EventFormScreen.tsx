@@ -30,8 +30,8 @@ const defaultDraftValues = {
   startTime: "09:00",
 };
 
-const timeOptions = Array.from({ length: 25 }, (_, index) => {
-  const hour = 7 + Math.floor(index / 2);
+const timeOptions = Array.from({ length: 48 }, (_, index) => {
+  const hour = Math.floor(index / 2);
   const minute = index % 2 === 0 ? "00" : "30";
   return `${String(hour).padStart(2, "0")}:${minute}`;
 });
@@ -251,6 +251,10 @@ function Label({ text }: { text: string }) {
   return <Text style={styles.label}>{text}</Text>;
 }
 
+const ITEM_HEIGHT = 44;
+const SHEET_HEIGHT = 320;
+const SHEET_PADDING = 24;
+
 function TimeSelect({
   fallbackValue,
   isOpen,
@@ -267,28 +271,39 @@ function TimeSelect({
   value: string;
 }) {
   const selected = value || fallbackValue;
+  const scrollRef = useRef<ScrollView>(null);
+
+  const scrollToSelected = () => {
+    const index = timeOptions.indexOf(selected);
+    if (index >= 0 && scrollRef.current) {
+      const y = index * ITEM_HEIGHT - (SHEET_HEIGHT - SHEET_PADDING) / 2 + ITEM_HEIGHT / 2;
+      scrollRef.current.scrollTo({ y: Math.max(0, y), animated: false });
+    }
+  };
+
   return (
     <View>
       <TouchableOpacity style={styles.selectButton} onPress={onToggle}>
         <Text style={styles.selectButtonText}>{selected}</Text>
         <Text style={styles.selectChevron}>{isOpen ? "⌃" : "⌄"}</Text>
       </TouchableOpacity>
-      {isOpen ? (
-        <View style={styles.dropdown}>
-          {timeOptions.map((option) => (
-            <TouchableOpacity
-              key={option}
-              style={[styles.dropdownOption, selected === option && styles.selectedDropdownOption]}
-              onPress={() => {
-                onChange(option);
-                onClose();
-              }}
-            >
-              <Text style={[styles.dropdownOptionText, selected === option && styles.selectedOptionText]}>{option}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      ) : null}
+      <Modal visible={isOpen} transparent animationType="fade" onRequestClose={onClose} onShow={scrollToSelected}>
+        <TouchableOpacity style={styles.modalBackdrop} activeOpacity={1} onPress={onClose}>
+          <View style={styles.modalSheet}>
+            <ScrollView ref={scrollRef}>
+              {timeOptions.map((option) => (
+                <TouchableOpacity
+                  key={option}
+                  style={[styles.dropdownOption, selected === option && styles.selectedDropdownOption]}
+                  onPress={() => { onChange(option); onClose(); }}
+                >
+                  <Text style={[styles.dropdownOptionText, selected === option && styles.selectedOptionText]}>{option}</Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }
@@ -296,8 +311,9 @@ function TimeSelect({
 const styles = StyleSheet.create({
   content: { flex: 1 },
   contentInner: { padding: 18, paddingBottom: 24 },
-  dropdown: { backgroundColor: "#fff", borderColor: "#dbe1e7", borderRadius: 8, borderWidth: 1, gap: 4, marginTop: 6, maxHeight: 220, overflow: "scroll", padding: 6 },
-  dropdownOption: { borderRadius: 7, paddingHorizontal: 10, paddingVertical: 9 },
+  modalBackdrop: { backgroundColor: "rgba(0,0,0,0.3)", flex: 1, justifyContent: "flex-end" },
+  modalSheet: { backgroundColor: "#fff", borderTopLeftRadius: 16, borderTopRightRadius: 16, maxHeight: 320, padding: 12 },
+  dropdownOption: { alignItems: "center", borderRadius: 7, height: 44, justifyContent: "center", paddingHorizontal: 10 },
   dropdownOptionText: { color: "#303741", fontSize: 14, fontWeight: "800" },
   flex: { flex: 1 },
   footerRow: { flexDirection: "row", gap: 10, justifyContent: "flex-end", marginTop: 18 },
